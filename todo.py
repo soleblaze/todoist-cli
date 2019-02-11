@@ -70,7 +70,7 @@ def list_all_tasks(api):
     for p in api.state['projects']:
         name = p['name']
         project_id = p['id']
-        p[project_id] = name
+        projects[project_id] = name
 
     for item in api.state['items']:
         if item['is_deleted']:
