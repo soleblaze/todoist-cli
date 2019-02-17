@@ -399,7 +399,11 @@ def add_item(api):
         project_id = create_project(api, project_name)
     if labels != []:
         for label in labels:
-            label_ids.append(label_list.get(label, create_label(api, label)))
+            if label not in label_list:
+                label_ids.append(create_label(api, label))
+            else:
+                label_ids.append(label_list[label])
+
         api.items.add(task, project_id, labels=label_ids)
     else:
         api.items.add(task, project_id)
