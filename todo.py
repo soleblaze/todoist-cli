@@ -276,6 +276,16 @@ def get_proj_id(api, project):
         return None
 
 
+def get_label_id(api, label):
+    """ Takes the api object and a label name and returns its id """
+    labels = sync(api)['labels']
+
+    try:
+        return labels[label]
+    except NameError:
+        return None
+
+
 def create_project(api, name):
     """ Takes the api and the name of a project and creates it and returns
     the new project's id """
@@ -284,6 +294,16 @@ def create_project(api, name):
     print("Created Project: {}".format(name))
 
     return get_proj_id(api, name)
+
+
+def create_label(api, name):
+    """ Takes the api and the name of a project and creates it and returns
+    the new project's id """
+    api.labels.add(name)
+    api.commit()
+    print("Created Label: {}".format(name))
+
+    return get_label_id(api, name)
 
 
 def add_item(api):
@@ -302,11 +322,12 @@ def add_item(api):
     print(task)
 
     project_id = get_proj_id(api, project_name)
-
+    label_ids = []
     if not project_id:
         project_id = create_project(api, project_name)
     if labels != []:
-        label_ids = [label_list[l] for l in labels]
+        for label in labels:
+            label_ids.append(label_list.get(label, create_label(api, label)))
         api.items.add(task, project_id, labels=label_ids)
     else:
         api.items.add(task, project_id)
@@ -349,7 +370,7 @@ if __name__ == "__main__":
         "sync": lambda: sync(API),
         "projects": lambda: list_projects(API),
         "list": lambda: list_items(API),
-        "label": lambda: list_labels(API),
+        "labels": lambda: list_labels(API),
         "add": lambda: add_item(API),
         "done": lambda: done(API)
     }
