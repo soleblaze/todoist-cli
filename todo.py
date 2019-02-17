@@ -248,8 +248,9 @@ def list_items_all(api):
                 content = items[proj_id][id]['content']
                 index = items[proj_id][id]['index']
 
-                for label in items[proj_id][id]['labels']:
-                    temp_labels.append('@' + labels[label])
+                for key, value in labels.items():
+                    if value in items[proj_id][id]['labels']:
+                        temp_labels.append('@' + key)
 
             except KeyError:
                 continue
