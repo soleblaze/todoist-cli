@@ -1,9 +1,27 @@
 #!/usr/bin/env python3
 """ lists and adds tasks to todoist """
 
+import json
 import os
+import re
 import sys
 import todoist
+
+
+def print_help():
+    """ Prints out help """
+    msg = "add [project] [task] - adds task to project\n"
+    msg += "list - lists all projects and their items\n"
+    msg += "list [project] - lists items associated with that project\n"
+    msg += "projects - lists projects"
+    print(msg)
+    exit(0)
+
+
+def natural_sort(s, nsre=re.compile('([0-9]+)')):
+    """ Used as a key in sorted to naturally sort numbers in strings """
+    return [int(text) if text.isdigit() else text.lower()
+            for text in nsre.split(s)]
 
 
 def connect():
@@ -19,38 +37,144 @@ def connect():
     return api
 
 
-def print_help():
-    """ Prints out help """
-    msg = "add [project] [task] - adds task to project\n"
-    msg += "list - lists all projects and their items\n"
-    msg += "list [project] - lists items associated with that project\n"
-    msg += "projects - lists projects"
-    print(msg)
-    exit(0)
+def get_projects(api):
+    """ Get a list of projects and a dict for the useful info """
+    projects = {}
+    for project in api.state['projects']:
+        if project['is_deleted']:
+            continue
+        if project['is_archived']:
+            continue
+        projects[project['id']] = {
+            "name": project['name']
+        }
+    return projects
+
+
+def get_items(api):
+    """ Get a list of projects and a dict for the useful info """
+    items = {}
+    for item in api.state['items']:
+        if item['is_deleted']:
+            continue
+        if item['in_history']:
+            continue
+        if item['is_archived']:
+            continue
+
+        if item['project_id'] not in items:
+            items[item['project_id']] = {}
+        items[item['project_id']][item['id']] = {
+            "content": item['content']
+        }
+
+        index = 1
+        for proj_id in items:
+            for id in items[proj_id]:
+                items[proj_id][id].update({"index": index})
+                index += 1
+    return items
+
+
+def save_state(projects, items):
+    state = {
+        "projects": projects,
+        "items": items
+    }
+    fh = open(os.path.expanduser("~/.config/todoist/cache"), "w")
+    fh.write(json.dumps(state))
+    fh.close()
+    return True
+
+
+def sync(api):
+    projects = get_projects(api)
+    items = get_items(api)
+    save_state(projects, items)
+    return {"projects": projects, "items": items}
+
+
+def list_projects(api):
+    projects = sync(api)['projects']
+    output = []
+    for id in projects:
+        output.append(projects[id]['name'])
+
+    print('\n'.join(sorted(output)))
+    return True
+
+
+def list_items(api):
+    if len(sys.argv) == 2:
+        list_items_all(api)
+    elif len(sys.argv) == 3:
+        print_help()
+    elif sys.argv[2].lower() == 'project':
+        list_items_project(api, ' '.join(sys.argv[3:]))
+
+
+def list_items_project(api, project):
+    data = sync(api)
+    items = data['items']
+    projects = data['projects']
+    proj_ids = []
+    output = []
+
+    for id in projects:
+        if project.lower() in projects[id]['name'].lower():
+            proj_ids.append(id)
+
+    if not proj_ids:
+        print("No project named {}".format(project))
+        exit(0)
+
+    for proj_id in proj_ids:
+        for id in items[proj_id]:
+            try:
+                project_name = projects[proj_id]['name']
+                content = items[proj_id][id]['content']
+                index = items[proj_id][id]['index']
+            except KeyError:
+                continue
+
+            output.append(f"[{index}] {project_name} - {content}")
+
+    print('\n'.join(sorted(output, key=natural_sort)))
+    return True
+
+
+def list_items_all(api):
+    data = sync(api)
+    items = data['items']
+    projects = data['projects']
+    output = []
+    for proj_id in items:
+        for id in items[proj_id]:
+            try:
+                project_name = projects[proj_id]['name']
+                content = items[proj_id][id]['content']
+                index = items[proj_id][id]['index']
+            except KeyError:
+                continue
+
+            output.append(f"[{index}] {project_name} - {content}")
+
+    print('\n'.join(sorted(output, key=natural_sort)))
+    return True
 
 
 def get_proj_id(api, project):
     """ Takes the api object and a project name and returns its id """
     # Get ID for project if it exists
-    for p in api.state['projects']:
-        if p['name'].lower() == project.lower():
-            project_id = p['id']
+    projects = sync(api)['projects']
+
+    for id in projects:
+        if projects[id]['name'].lower() == project.lower():
+            project_id = id
     try:
         return project_id
     except NameError:
         return None
-
-
-def add_task(api, project_name, task):
-    """ Takes a todoist api object, the project name, and the task and adds
-    the task to todoist """
-
-    project_id = get_proj_id(api, project_name)
-    if not project_id:
-        project_id = create_project(api, project_name)
-    api.items.add(task, project_id)
-    api.commit()
-    print("Task added")
 
 
 def create_project(api, name):
@@ -63,67 +187,24 @@ def create_project(api, name):
     return get_proj_id(api, name)
 
 
-def list_all_tasks(api):
-    """ Takes the api and Returns a list of all tasks """
-    projects = {}
-    tasks = {}
-    for p in api.state['projects']:
-        name = p['name']
-        project_id = p['id']
-        projects[project_id] = name
+def add_item(api):
+    """ Takes a todoist api object, the project name, and the task and adds
+    the task to todoist """
 
-    for item in api.state['items']:
-        if item['is_deleted']:
-            break
-        if item['in_history']:
-            break
+    if len(sys.argv) < 4:
+        print_help()
+        exit(0)
 
-        project_id = item['project_id']
-        project_name = projects[project_id]
-        content = item['content']
-        if project_name in tasks:
-            tasks[project_name].append(content)
-        else:
-            tasks[project_name] = [content]
+    project_name = sys.argv[2]
+    task = ' '.join(sys.argv[3:])
 
-    for p, tasks in tasks.items():
-        for task in tasks:
-            print("{} - {}".format(p, task))
-
-
-def list_tasks(api, project):
-    """ Takes the api and project name and returns the tasks associated with
-    that project """
-    tasks = []
-    project_id = ''
-    for p in api.state['projects']:
-        if p['name'].lower() == project.lower():
-            project_id = p['id']
+    project_id = get_proj_id(api, project_name)
 
     if not project_id:
-        print("No project named {}".format(project))
-        exit(0)
-    for item in api.state['items']:
-        if item['is_deleted']:
-            break
-        if item['in_history']:
-            break
-
-        if item['project_id'] == project_id:
-            tasks.append(item['content'])
-
-    print("\n".join(tasks))
-    return
-
-
-def list_projects(api):
-    """ Takes the API object and prints a list of projects """
-    projects = []
-    for p in api.state['projects']:
-        projects.append(p['name'])
-
-    projects.sort(key=lambda y: y.lower())
-    print("\n".join(projects))
+        project_id = create_project(api, project_name)
+    api.items.add(task, project_id)
+    api.commit()
+    print("Task added")
 
 
 if __name__ == "__main__":
@@ -132,16 +213,11 @@ if __name__ == "__main__":
     API = connect()
     ACTION = sys.argv[1]
 
-    if ACTION == 'add':
-        if len(sys.argv) < 3:
-            print_help()
-        add_task(API, sys.argv[2], ' '.join(sys.argv[3:]))
-    elif ACTION == 'list':
-        if len(sys.argv) == 2:
-            list_all_tasks(API)
-        else:
-            list_tasks(API, ' '.join(sys.argv[2:]))
-    elif ACTION == 'projects':
-        list_projects(API)
-    else:
-        print_help()
+    ACTIONS = {
+        "sync": lambda: sync(API),
+        "projects": lambda: list_projects(API),
+        "list": lambda: list_items(API),
+        "add": lambda: add_item(API)
+    }
+
+    ACTIONS.get(ACTION, lambda: print_help())()
