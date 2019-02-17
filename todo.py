@@ -200,9 +200,9 @@ def list_items_label(api, label):
     label_ids = []
     output = []
 
-    for id in labels:
-        if label.lower() in labels[id].lower():
-            label_ids.append(id)
+    for name in labels:
+        if label.lower() in name.lower():
+            label_ids.append(labels[name])
 
     if not label_ids:
         print("No label named {}".format(label))
@@ -220,7 +220,8 @@ def list_items_label(api, label):
                         index = items[proj_id][item_id]['index']
 
                         for label in items[proj_id][item_id]['labels']:
-                            temp_labels.append('@' + labels[label])
+                            name = ' '.join([l for l in labels if labels[l] == label])
+                            temp_labels.append('@' + name)
 
                     except KeyError:
                         continue
