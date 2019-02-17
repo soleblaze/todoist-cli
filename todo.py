@@ -11,6 +11,7 @@ import todoist
 def print_help():
     """ Prints out help """
     msg = "add [project] [task] - adds task to project\n"
+    msg += "archive [project] - archives project\n"
     msg += "done [task index] - marks task as done\n"
     msg += "labels - lists labels\n"
     msg += "list - lists all projects and their items\n"
@@ -304,6 +305,19 @@ def create_project(api, name):
     return get_proj_id(api, name)
 
 
+def archive_project(api):
+    if len(sys.argv) != 3:
+        print_help()
+        exit(0)
+
+    name = sys.argv[2]
+    id = get_proj_id(api, name)
+    api.projects.archive(id)
+    api.commit()
+    print("Archived Project: {}".format(name))
+    return True
+
+
 def create_label(api, name):
     """ Takes the api and the name of a project and creates it and returns
     the new project's id """
@@ -380,7 +394,8 @@ if __name__ == "__main__":
         "list": lambda: list_items(API),
         "labels": lambda: list_labels(API),
         "add": lambda: add_item(API),
-        "done": lambda: done(API)
+        "done": lambda: done(API),
+        "archive": lambda: archive_project(API)
     }
 
     ACTIONS.get(ACTION, lambda: print_help())()
