@@ -129,7 +129,7 @@ def list_projects(api):
     for id in projects:
         output.append(projects[id]['name'])
 
-    print('\n'.join(sorted(output)))
+    print('\n'.join(sorted(output, key=natural_sort)))
     return True
 
 
