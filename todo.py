@@ -14,6 +14,7 @@ def print_help():
     msg += "done [task index] - marks task as done\n"
     msg += "labels - lists labels\n"
     msg += "list - lists all projects and their items\n"
+    msg += "list [label] - lists items associated with that label\n"
     msg += "list [project] - lists items associated with that project\n"
     msg += "projects - lists projects"
     print(msg)
@@ -150,6 +151,10 @@ def list_items(api):
         print_help()
     elif sys.argv[2].lower() == 'project':
         list_items_project(api, ' '.join(sys.argv[3:]))
+    elif sys.argv[2].lower() == 'labels':
+        list_items_labels(api, ' '.join(sys.argv[3:]))
+    else:
+        print_help()
 
 
 def list_items_project(api, project):
@@ -185,6 +190,47 @@ def list_items_project(api, project):
             i_labels = ' '.join(temp_labels)
 
             output.append(f"[{index}] {project_name} - {content} {i_labels}")
+
+    print('\n'.join(sorted(output, key=natural_sort)))
+    return True
+
+
+def list_items_labels(api, label):
+    data = sync(api)
+    items = data['items']
+    projects = data['projects']
+    labels = data['labels']
+    label_ids = []
+    output = []
+
+    for id in labels:
+        if label.lower() in labels[id].lower():
+            label_ids.append(id)
+
+    if not label_ids:
+        print("No label named {}".format(label))
+        exit(0)
+
+    for label_id in label_ids:
+        for proj_id in items:
+            for item_id in items[proj_id]:
+                if label_id in items[proj_id][item_id]['labels']:
+                    temp_labels = []
+
+                    try:
+                        project_name = projects[proj_id]['name']
+                        content = items[proj_id][item_id]['content']
+                        index = items[proj_id][item_id]['index']
+
+                        for label in items[proj_id][item_id]['labels']:
+                            temp_labels.append('@' + labels[label])
+
+                    except KeyError:
+                        continue
+
+                    i_labels = ' '.join(temp_labels)
+
+                    output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
