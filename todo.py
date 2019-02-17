@@ -148,8 +148,8 @@ def list_items(api):
         print_help()
     elif sys.argv[2].lower() == 'project':
         list_items_project(api, ' '.join(sys.argv[3:]))
-    elif sys.argv[2].lower() == 'labels':
-        list_items_labels(api, ' '.join(sys.argv[3:]))
+    elif sys.argv[2].lower() == 'label':
+        list_items_label(api, ' '.join(sys.argv[3:]))
     else:
         print_help()
 
@@ -192,7 +192,7 @@ def list_items_project(api, project):
     return True
 
 
-def list_items_labels(api, label):
+def list_items_label(api, label):
     data = sync(api)
     items = data['items']
     projects = data['projects']
@@ -340,7 +340,7 @@ if __name__ == "__main__":
         "sync": lambda: sync(API),
         "projects": lambda: list_projects(API),
         "list": lambda: list_items(API),
-        "labels": lambda: list_labels(API),
+        "label": lambda: list_labels(API),
         "add": lambda: add_item(API),
         "done": lambda: done(API)
     }
