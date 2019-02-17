@@ -144,6 +144,7 @@ def list_items_project(api, project):
     data = sync(api)
     items = data['items']
     projects = data['projects']
+    labels = data['labels']
     proj_ids = []
     output = []
 
@@ -157,14 +158,21 @@ def list_items_project(api, project):
 
     for proj_id in proj_ids:
         for id in items[proj_id]:
+            temp_labels = []
             try:
                 project_name = projects[proj_id]['name']
                 content = items[proj_id][id]['content']
                 index = items[proj_id][id]['index']
+
+                for label in items[proj_id][id]['labels']:
+                    temp_labels.append('@' + labels[label])
+
             except KeyError:
                 continue
 
-            output.append(f"[{index}] {project_name} - {content}")
+            i_labels = ' '.join(temp_labels)
+
+            output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
@@ -173,18 +181,26 @@ def list_items_project(api, project):
 def list_items_all(api):
     data = sync(api)
     items = data['items']
+    labels = data['labels']
     projects = data['projects']
     output = []
     for proj_id in items:
         for id in items[proj_id]:
+            temp_labels = []
             try:
                 project_name = projects[proj_id]['name']
                 content = items[proj_id][id]['content']
                 index = items[proj_id][id]['index']
+
+                for label in items[proj_id][id]['labels']:
+                    temp_labels.append('@' + labels[label])
+
             except KeyError:
                 continue
 
-            output.append(f"[{index}] {project_name} - {content}")
+            i_labels = ' '.join(temp_labels)
+
+            output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
