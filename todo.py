@@ -51,6 +51,16 @@ def get_projects(api):
     return projects
 
 
+def get_labels(api):
+    """ Get a list of projects and a dict for the useful info """
+    labels = {}
+    for label in api.state['labels']:
+        if label['is_deleted']:
+            continue
+        labels[label['id']] = label['name']
+    return labels
+
+
 def get_items(api):
     """ Get a list of projects and a dict for the useful info """
     items = {}
@@ -65,7 +75,8 @@ def get_items(api):
         if item['project_id'] not in items:
             items[item['project_id']] = {}
         items[item['project_id']][item['id']] = {
-            "content": item['content']
+            "content": item['content'],
+            "labels": item['labels']
         }
 
         index = 1
@@ -76,10 +87,11 @@ def get_items(api):
     return items
 
 
-def save_state(projects, items):
+def save_state(projects, items, labels):
     state = {
         "projects": projects,
-        "items": items
+        "items": items,
+        "labels": labels
     }
     fh = open(os.path.expanduser("~/.config/todoist/cache"), "w")
     fh.write(json.dumps(state))
@@ -104,8 +116,9 @@ def projects_cache():
 def sync(api):
     projects = get_projects(api)
     items = get_items(api)
-    save_state(projects, items)
-    return {"projects": projects, "items": items}
+    labels = get_labels(api)
+    save_state(projects, items, labels)
+    return {"projects": projects, "items": items, "labels": labels}
 
 
 def list_projects(api):
