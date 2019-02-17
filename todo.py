@@ -392,7 +392,6 @@ def add_item(api):
     labels = [t for t in sys.argv[3:] if t.startswith('@')]
     task = ' '.join([w for w in sys.argv[3:] if w not in labels])
     labels = [t.strip('@') for t in labels]
-    print(task)
 
     project_id = get_proj_id(api, project_name)
     label_ids = []
