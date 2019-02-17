@@ -148,8 +148,18 @@ def list_projects(api):
 
 def list_labels(api):
     labels = sync(api)['labels']
+    items = sync(api)['items']
+    output = []
 
-    print('\n'.join(sorted(labels, key=natural_sort)))
+    for name, id in labels.items():
+        count = 0
+        for proj_id in items:
+            for item_id in items[proj_id]:
+                if id in items[proj_id][item_id]['labels']:
+                    count += 1
+        output.append(f"{name} ({count})")
+
+    print('\n'.join(sorted(output, key=natural_sort)))
     return True
 
 
