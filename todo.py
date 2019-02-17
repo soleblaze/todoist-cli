@@ -287,6 +287,7 @@ def create_project(api, name):
 
 
 def add_item(api):
+    label_list = get_labels(api)
     """ Takes a todoist api object, the project name, and the task and adds
     the task to todoist """
 
@@ -295,13 +296,20 @@ def add_item(api):
         exit(0)
 
     project_name = sys.argv[2]
-    task = ' '.join(sys.argv[3:])
+    labels = [t for t in sys.argv[3:] if t.startswith('@')]
+    task = ' '.join([w for w in sys.argv[3:] if w not in labels])
+    labels = [t.strip('@') for t in labels]
+    print(task)
 
     project_id = get_proj_id(api, project_name)
 
     if not project_id:
         project_id = create_project(api, project_name)
-    api.items.add(task, project_id)
+    if labels != []:
+        label_ids = [label_list[l] for l in labels]
+        api.items.add(task, project_id, labels=label_ids)
+    else:
+        api.items.add(task, project_id)
     api.commit()
     print("Task added")
 
