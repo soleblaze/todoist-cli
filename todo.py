@@ -125,10 +125,16 @@ def sync(api):
 
 
 def list_projects(api):
-    projects = sync(api)['projects']
+    data = sync(api)
+    projects = data['projects']
+    items = data['items']
     output = []
     for id in projects:
-        output.append(projects[id]['name'])
+        try:
+            count = len(items[id])
+        except KeyError:
+            count = 0
+        output.append(f"{projects[id]['name']} ({count})")
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
