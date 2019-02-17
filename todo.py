@@ -60,7 +60,7 @@ def get_labels(api):
     for label in api.state['labels']:
         if label['is_deleted']:
             continue
-        labels[label['id']] = label['name']
+        labels[label['name']] = label['id']
     return labels
 
 
@@ -136,11 +136,8 @@ def list_projects(api):
 
 def list_labels(api):
     labels = sync(api)['labels']
-    output = []
-    for id in labels:
-        output.append(labels[id])
 
-    print('\n'.join(sorted(output, key=natural_sort)))
+    print('\n'.join(sorted(labels, key=natural_sort)))
     return True
 
 
