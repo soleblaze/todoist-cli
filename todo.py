@@ -87,6 +87,20 @@ def save_state(projects, items):
     return True
 
 
+def load_state():
+    with open(os.path.expanduser("~/.config/todoist/cache"), "r") as f:
+        data = json.load(f)
+    return data
+
+
+def items_cache():
+    return load_state()['items']
+
+
+def projects_cache():
+    return load_state()['projects']
+
+
 def sync(api):
     projects = get_projects(api)
     items = get_items(api)
@@ -207,6 +221,31 @@ def add_item(api):
     print("Task added")
 
 
+def done(api):
+    """ Takes a todoist api object, the project name, and the task and adds
+    the task to todoist """
+
+    if len(sys.argv) != 3:
+        print_help()
+        exit(0)
+
+    index = int(sys.argv[2])
+    items = items_cache()
+
+    for proj_id in items:
+        for id in items[proj_id]:
+            if items[proj_id][id]['index'] == index:
+                item_id = id
+                content = items[proj_id][id]['content']
+                break
+
+    api.items.complete([item_id])
+    api.commit()
+    print(f"Marking [{index}] {content} as done")
+
+    return True
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print_help()
@@ -217,7 +256,8 @@ if __name__ == "__main__":
         "sync": lambda: sync(API),
         "projects": lambda: list_projects(API),
         "list": lambda: list_items(API),
-        "add": lambda: add_item(API)
+        "add": lambda: add_item(API),
+        "done": lambda: done(API)
     }
 
     ACTIONS.get(ACTION, lambda: print_help())()
