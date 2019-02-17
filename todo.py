@@ -118,6 +118,10 @@ def projects_cache():
     return load_state()['projects']
 
 
+def labels_cache():
+    return load_state()['labels']
+
+
 def sync(api):
     projects = get_projects(api)
     items = get_items(api)
@@ -160,6 +164,25 @@ def list_items(api):
         list_items_label(api, ' '.join(sys.argv[3:]))
     else:
         print_help()
+
+
+def cache(api):
+    if len(sys.argv) != 3:
+        print_help()
+    elif sys.argv[2].lower() == 'projects':
+        list_cache_projects()
+    else:
+        print_help()
+
+
+def list_cache_projects():
+    projects = projects_cache()
+    output = []
+    for id in projects:
+        output.append(projects[id]['name'])
+
+    print('\n'.join(sorted(output, key=natural_sort)))
+    return True
 
 
 def list_items_project(api, project):
@@ -415,6 +438,7 @@ if __name__ == "__main__":
         "done": lambda: done(API),
         "archive": lambda: archive_project(API),
         "delete": lambda: delete(API),
+        "cache": lambda: cache(API)
     }
 
     ACTIONS.get(ACTION, lambda: print_help())()
