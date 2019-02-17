@@ -12,11 +12,12 @@ def print_help():
     """ Prints out help """
     msg = "add [project] [task] - adds task to project\n"
     msg += "archive [project] - archives project\n"
+    msg += "delete label [tag] - deletes a label\n"
     msg += "done [task index] - marks task as done\n"
     msg += "labels - lists labels\n"
     msg += "list - lists all projects and their items\n"
-    msg += "list [label] - lists items associated with that label\n"
-    msg += "list [project] - lists items associated with that project\n"
+    msg += "list label [label] - lists items associated with that label\n"
+    msg += "list project [project] - lists items associated with that project\n"
     msg += "projects - lists projects"
     print(msg)
     exit(0)
@@ -318,6 +319,23 @@ def archive_project(api):
     return True
 
 
+def delete(api):
+    if len(sys.argv) != 4:
+        print_help()
+        exit(0)
+    elif sys.argv[2].lower() == 'label':
+        delete_label(api, ' '.join(sys.argv[3:]))
+    else:
+        print_help()
+
+
+def delete_label(api, name):
+    id = get_label_id(api, name)
+    api.labels.delete(id)
+    api.commit()
+    print("Deleted Label: {}".format(name))
+
+
 def create_label(api, name):
     """ Takes the api and the name of a project and creates it and returns
     the new project's id """
@@ -395,7 +413,8 @@ if __name__ == "__main__":
         "labels": lambda: list_labels(API),
         "add": lambda: add_item(API),
         "done": lambda: done(API),
-        "archive": lambda: archive_project(API)
+        "archive": lambda: archive_project(API),
+        "delete": lambda: delete(API),
     }
 
     ACTIONS.get(ACTION, lambda: print_help())()
