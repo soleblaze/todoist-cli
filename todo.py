@@ -11,6 +11,8 @@ import todoist
 def print_help():
     """ Prints out help """
     msg = "add [project] [task] - adds task to project\n"
+    msg += "done [task index] - marks task as done\n"
+    msg += "labels - lists labels\n"
     msg += "list - lists all projects and their items\n"
     msg += "list [project] - lists items associated with that project\n"
     msg += "projects - lists projects"
@@ -128,6 +130,16 @@ def list_projects(api):
         output.append(projects[id]['name'])
 
     print('\n'.join(sorted(output)))
+    return True
+
+
+def list_labels(api):
+    labels = sync(api)['labels']
+    output = []
+    for id in labels:
+        output.append(labels[id])
+
+    print('\n'.join(sorted(output, key=natural_sort)))
     return True
 
 
@@ -285,6 +297,7 @@ if __name__ == "__main__":
         "sync": lambda: sync(API),
         "projects": lambda: list_projects(API),
         "list": lambda: list_items(API),
+        "labels": lambda: list_labels(API),
         "add": lambda: add_item(API),
         "done": lambda: done(API)
     }
