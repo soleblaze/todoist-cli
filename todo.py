@@ -212,6 +212,11 @@ def list_items_project(api, project):
         exit(0)
 
     for proj_id in proj_ids:
+
+        if proj_id not in items:
+            print(f"No items in {project}.")
+            continue
+
         for id in items[proj_id]:
             temp_labels = []
             try:
