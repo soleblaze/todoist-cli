@@ -436,6 +436,35 @@ def done(api):
     return True
 
 
+def move(api):
+
+    if len(sys.argv) < 4:
+        print_help()
+        exit(0)
+
+    index = int(sys.argv[2])
+    new_proj = ' '.join(sys.argv[3:])
+    items = items_cache()
+    new_proj_id = get_proj_id(api, new_proj)
+
+    if new_proj_id is None:
+        print(f"Error: {new_proj} does not exist.")
+        exit(1)
+
+    for proj_id in items:
+        for id in items[proj_id]:
+            if items[proj_id][id]['index'] == index:
+                content = items[proj_id][id]['content']
+                project_items = {proj_id: [id]}
+                break
+
+    api.items.move(project_items, new_proj_id)
+    api.commit()
+    print(f"Moved [{index}] {content} to {new_proj}")
+
+    return True
+
+
 if __name__ == "__main__":
     if len(sys.argv) == 1:
         print_help()
@@ -451,7 +480,8 @@ if __name__ == "__main__":
         "done": lambda: done(API),
         "archive": lambda: archive_project(API),
         "delete": lambda: delete(API),
-        "cache": lambda: cache(API)
+        "cache": lambda: cache(API),
+        "move": lambda: move(API)
     }
 
     ACTIONS.get(ACTION, lambda: print_help())()
