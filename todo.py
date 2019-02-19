@@ -204,6 +204,10 @@ def list_items_project(api, project):
     output = []
 
     for id in projects:
+        if project.lower() == projects[id]['name'].lower():
+            proj_ids = [id]
+            break
+
         if project.lower() in projects[id]['name'].lower():
             proj_ids.append(id)
 
@@ -248,6 +252,10 @@ def list_items_label(api, label):
     output = []
 
     for name in labels:
+        if label.lower() == name.lower():
+            label_ids = [labels[name]]
+            break
+
         if label.lower() in name.lower():
             label_ids.append(labels[name])
 
