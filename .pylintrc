@@ -1,0 +1,9 @@
+[FORMAT]
+# Maximum number of characters on a single line.
+max-line-length=100
+
+# Regexp for a line that is allowed to be longer than the limit.
+ignore-long-lines=^\s*(# )?<?https?://\S+>?$
+
+# Good variable names which should always be accepted, separated by a comma
+good-names=f,fh,i,s,x,y

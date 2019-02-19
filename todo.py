@@ -86,13 +86,14 @@ def get_items(api):
 
         index = 1
         for proj_id in items:
-            for id in items[proj_id]:
-                items[proj_id][id].update({"index": index})
+            for item_id in items[proj_id]:
+                items[proj_id][item_id].update({"index": index})
                 index += 1
     return items
 
 
 def save_state(projects, items, labels):
+    """ Saves relevant todo information as json into a cache file """
     state = {
         "projects": projects,
         "items": items,
@@ -105,24 +106,29 @@ def save_state(projects, items, labels):
 
 
 def load_state():
+    """ Load relevant todo information as json from a cache file """
     with open(os.path.expanduser("~/.config/todoist/cache"), "r") as f:
         data = json.load(f)
     return data
 
 
 def items_cache():
+    """ Returns a list of items from the cache file """
     return load_state()['items']
 
 
 def projects_cache():
+    """ Returns a list of projects from the cache file """
     return load_state()['projects']
 
 
 def labels_cache():
+    """ Returns a list of labels from the cache file """
     return load_state()['labels']
 
 
 def sync(api):
+    """ Pulls todo items from api.state and returns them as a dict """
     projects = get_projects(api)
     items = get_items(api)
     labels = get_labels(api)
@@ -131,31 +137,33 @@ def sync(api):
 
 
 def list_projects(api):
+    """ output a list of projects """
     data = sync(api)
     projects = data['projects']
     items = data['items']
     output = []
-    for id in projects:
+    for proj_id in projects:
         try:
-            count = len(items[id])
+            count = len(items[proj_id])
         except KeyError:
             count = 0
-        output.append(f"{projects[id]['name']} ({count})")
+        output.append(f"{projects[proj_id]['name']} ({count})")
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
 
 
 def list_labels(api):
+    """ outputs a list of labels """
     labels = sync(api)['labels']
     items = sync(api)['items']
     output = []
 
-    for name, id in labels.items():
+    for name, label_id in labels.items():
         count = 0
         for proj_id in items:
             for item_id in items[proj_id]:
-                if id in items[proj_id][item_id]['labels']:
+                if label_id in items[proj_id][item_id]['labels']:
                     count += 1
         output.append(f"{name} ({count})")
 
@@ -164,6 +172,7 @@ def list_labels(api):
 
 
 def list_items(api):
+    """ outputs a list of all items """
     if len(sys.argv) == 2:
         list_items_all(api)
     elif len(sys.argv) == 3:
@@ -176,7 +185,8 @@ def list_items(api):
         print_help()
 
 
-def cache(api):
+def cache():
+    """ Outputs items from cache instead of from todoist """
     if len(sys.argv) != 3:
         print_help()
     elif sys.argv[2].lower() == 'projects':
@@ -186,16 +196,18 @@ def cache(api):
 
 
 def list_cache_projects():
+    """ Outputs a list of projects from the json cache file """
     projects = projects_cache()
     output = []
-    for id in projects:
-        output.append(projects[id]['name'])
+    for proj_id in projects:
+        output.append(projects[proj_id]['name'])
 
     print('\n'.join(sorted(output, key=natural_sort)))
     return True
 
 
 def list_items_project(api, project):
+    """ Outputs a list of items associated with project """
     data = sync(api)
     items = data['items']
     projects = data['projects']
@@ -203,13 +215,13 @@ def list_items_project(api, project):
     proj_ids = []
     output = []
 
-    for id in projects:
-        if project.lower() == projects[id]['name'].lower():
-            proj_ids = [id]
+    for proj_id in projects:
+        if project.lower() == projects[proj_id]['name'].lower():
+            proj_ids = [proj_id]
             break
 
-        if project.lower() in projects[id]['name'].lower():
-            proj_ids.append(id)
+        if project.lower() in projects[proj_id]['name'].lower():
+            proj_ids.append(proj_id)
 
     if not proj_ids:
         print("No project named {}".format(project))
@@ -221,15 +233,15 @@ def list_items_project(api, project):
             print(f"No items in {project}.")
             continue
 
-        for id in items[proj_id]:
+        for item_id in items[proj_id]:
             temp_labels = []
             try:
                 project_name = projects[proj_id]['name']
-                content = items[proj_id][id]['content']
-                index = items[proj_id][id]['index']
+                content = items[proj_id][item_id]['content']
+                index = items[proj_id][item_id]['index']
 
                 for key, value in labels.items():
-                    if value in items[proj_id][id]['labels']:
+                    if value in items[proj_id][item_id]['labels']:
                         temp_labels.append('@' + key)
 
             except KeyError:
@@ -244,6 +256,7 @@ def list_items_project(api, project):
 
 
 def list_items_label(api, label):
+    """ Outputs a list of items associated with label """
     data = sync(api)
     items = data['items']
     projects = data['projects']
@@ -274,8 +287,8 @@ def list_items_label(api, label):
                         content = items[proj_id][item_id]['content']
                         index = items[proj_id][item_id]['index']
 
-                        for label in items[proj_id][item_id]['labels']:
-                            name = ' '.join([l for l in labels if labels[l] == label])
+                        for item_label_id in items[proj_id][item_id]['labels']:
+                            name = ' '.join([l for l in labels if labels[l] == item_label_id])
                             temp_labels.append('@' + name)
 
                     except KeyError:
@@ -290,21 +303,22 @@ def list_items_label(api, label):
 
 
 def list_items_all(api):
+    """ List all items """
     data = sync(api)
     items = data['items']
     labels = data['labels']
     projects = data['projects']
     output = []
     for proj_id in items:
-        for id in items[proj_id]:
+        for item_id in items[proj_id]:
             temp_labels = []
             try:
                 project_name = projects[proj_id]['name']
-                content = items[proj_id][id]['content']
-                index = items[proj_id][id]['index']
+                content = items[proj_id][item_id]['content']
+                index = items[proj_id][item_id]['index']
 
                 for key, value in labels.items():
-                    if value in items[proj_id][id]['labels']:
+                    if value in items[proj_id][item_id]['labels']:
                         temp_labels.append('@' + key)
 
             except KeyError:
@@ -320,12 +334,11 @@ def list_items_all(api):
 
 def get_proj_id(api, project):
     """ Takes the api object and a project name and returns its id """
-    # Get ID for project if it exists
     projects = sync(api)['projects']
 
-    for id in projects:
-        if projects[id]['name'].lower() == project.lower():
-            project_id = id
+    for proj_id in projects:
+        if projects[proj_id]['name'].lower() == project.lower():
+            project_id = proj_id
     try:
         return project_id
     except NameError:
@@ -353,19 +366,21 @@ def create_project(api, name):
 
 
 def archive_project(api):
+    """ Archive project passed """
     if len(sys.argv) != 3:
         print_help()
         exit(0)
 
     name = sys.argv[2]
-    id = get_proj_id(api, name)
-    api.projects.archive(id)
+    proj_id = get_proj_id(api, name)
+    api.projects.archive(proj_id)
     api.commit()
     print("Archived Project: {}".format(name))
     return True
 
 
 def delete(api):
+    """ Delete """
     if len(sys.argv) != 4:
         print_help()
         exit(0)
@@ -376,8 +391,9 @@ def delete(api):
 
 
 def delete_label(api, name):
-    id = get_label_id(api, name)
-    api.labels.delete(id)
+    """ Delete label """
+    label_id = get_label_id(api, name)
+    api.labels.delete(label_id)
     api.commit()
     print("Deleted Label: {}".format(name))
 
@@ -393,9 +409,10 @@ def create_label(api, name):
 
 
 def add_item(api):
-    label_list = get_labels(api)
     """ Takes a todoist api object, the project name, and the task and adds
     the task to todoist """
+
+    label_list = get_labels(api)
 
     if len(sys.argv) < 4:
         print_help()
@@ -436,13 +453,13 @@ def done(api):
     items = items_cache()
 
     for proj_id in items:
-        for id in items[proj_id]:
-            if items[proj_id][id]['index'] == index:
-                item_id = id
-                content = items[proj_id][id]['content']
+        for item_id in items[proj_id]:
+            if items[proj_id][item_id]['index'] == index:
+                selected_id = item_id
+                content = items[proj_id][item_id]['content']
                 break
 
-    api.items.complete([item_id])
+    api.items.complete([selected_id])
     api.commit()
     print(f"Marking [{index}] {content} as done")
 
@@ -450,6 +467,7 @@ def done(api):
 
 
 def move(api):
+    """ Move item to another project """
 
     if len(sys.argv) < 4:
         print_help()
@@ -465,10 +483,10 @@ def move(api):
         exit(1)
 
     for proj_id in items:
-        for id in items[proj_id]:
-            if items[proj_id][id]['index'] == index:
-                content = items[proj_id][id]['content']
-                project_items = {proj_id: [id]}
+        for item_id in items[proj_id]:
+            if items[proj_id][item_id]['index'] == index:
+                content = items[proj_id][item_id]['content']
+                project_items = {proj_id: [item_id]}
                 break
 
     api.items.move(project_items, new_proj_id)
@@ -493,7 +511,7 @@ if __name__ == "__main__":
         "done": lambda: done(API),
         "archive": lambda: archive_project(API),
         "delete": lambda: delete(API),
-        "cache": lambda: cache(API),
+        "cache": lambda: cache(),
         "move": lambda: move(API)
     }
 
