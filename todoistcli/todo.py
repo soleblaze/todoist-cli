@@ -20,7 +20,11 @@ def print_help():
     msg += "list project [project] - lists items associated with that project\n"
     msg += "projects - lists projects"
     print(msg)
-    exit(0)
+
+
+def print_formatted_output(output):
+    """ This will eventually handle formatting the output of data. """
+    print(output)
 
 
 def natural_sort(s, nsre=re.compile('([0-9]+)')):
