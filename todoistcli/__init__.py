@@ -173,25 +173,15 @@ def list_labels(api, cache_file="~/.config/todoist/cache"):
     return sorted(output, key=natural_sort)
 
 
-def cache():
-    """ Outputs items from cache instead of from todoist """
-    if len(sys.argv) != 3:
-        print_help()
-    elif sys.argv[2].lower() == 'projects':
-        list_cache_projects()
-    else:
-        print_help()
-
-
-def list_cache_projects():
+def list_cache_projects(cache_file="~/.config/todoist/cache"):
     """ Outputs a list of projects from the json cache file """
-    projects = projects_cache()
+    projects = projects_cache(cache_file)
+    print(projects)
     output = []
     for proj_id in projects:
         output.append(projects[proj_id]['name'])
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
 def list_items_project(api, project, cache_file="~/.config/todoist/cache"):

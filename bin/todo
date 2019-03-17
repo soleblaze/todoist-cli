@@ -4,6 +4,16 @@ import sys
 import todoistcli
 
 
+def cache():
+    """ Outputs items from cache instead of from todoist """
+    if len(sys.argv) != 3:
+        todoistcli.print_help()
+    elif sys.argv[2].lower() == 'projects':
+        todoistcli.print_formatted_output(todoistcli.list_cache_projects())
+    else:
+        todoistcli.print_help()
+
+
 def list_items(api):
     """ outputs a list of all items """
     if len(sys.argv) == 2:
@@ -34,7 +44,7 @@ ACTIONS = {
     "done": lambda: todoistcli.done(API),
     "archive": lambda: todoistcli.archive_project(API),
     "delete": lambda: todoistcli.delete(API),
-    "cache": lambda: todoistcli.cache(),
+    "cache": lambda: cache(),
     "move": lambda: todoistcli.move(API)
 }
 
