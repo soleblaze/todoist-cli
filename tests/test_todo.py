@@ -86,7 +86,11 @@ def test_save_state(tmpdir):
     output = tmpdir.join('test_cache')
     test_data = 'tests/test_state.json'
 
-    todoistcli.save_state(api.state['projects'], api.state['items'], api.state['labels'], output)
+    projects = todoistcli.get_projects(api)
+    items = todoistcli.get_items(api)
+    labels = todoistcli.get_labels(api)
+
+    todoistcli.save_state(projects, items, labels, output)
 
     fh = open(test_data)
     expected = json.load(fh)
@@ -105,33 +109,44 @@ def test_load_state():
 
     actual = todoistcli.load_state(test_data)
 
-    assert actual['projects'] == api.state['projects']
-    assert actual['items'] == api.state['items']
-    assert actual['labels'] == api.state['labels']
+    assert actual["projects"] == {"1": {"name": "project 1"},
+                                  "2": {"name": "project 2"},
+                                  "3": {"name": "project 3"}}
+    assert actual["items"] == {"1": {"1": {"content": "item 1", "index": 1, "labels": [1]},
+                                     "2": {"content": "item 2", "index": 2, "labels": [2]}},
+                               "3": {"3": {"content": "item 3", "index": 3, "labels": []}}}
+
+    assert actual["labels"] == {"label 1": 1, "label 2": 2, "label 3": 3}
 
 
 def test_items_cache():
     """ Validate that items_cache returns the items expected """
     test_data = 'tests/test_state.json'
+    actual = todoistcli.items_cache(test_data)
 
-    expected = todoistcli.items_cache(test_data)
-    assert api.state['items'] == expected
+    assert actual == {"1": {"1": {"content": "item 1", "index": 1, "labels": [1]},
+                            "2": {"content": "item 2", "index": 2, "labels": [2]}},
+                      "3": {"3": {"content": "item 3", "index": 3, "labels": []}}}
+
 
 
 def test_projects_cache():
     """ Validate that projects_cache returns the projects expected """
     test_data = 'tests/test_state.json'
 
-    expected = todoistcli.projects_cache(test_data)
-    assert api.state['projects'] == expected
+    actual = todoistcli.projects_cache(test_data)
+    assert actual == {"1": {"name": "project 1"},
+                      "2": {"name": "project 2"},
+                      "3": {"name": "project 3"}}
+
 
 
 def test_labels_cache():
     """ Validate that labels_cache returns the labels expected """
     test_data = 'tests/test_state.json'
 
-    expected = todoistcli.labels_cache(test_data)
-    assert api.state['labels'] == expected
+    actual = todoistcli.labels_cache(test_data)
+    assert actual == {"label 1": 1, "label 2": 2, "label 3": 3}
 
 
 def test_sync(tmpdir):
@@ -220,3 +235,12 @@ def test_list_items_all(tmpdir):
     assert actual == ["[1] project 1 - item 1 @label 1",
                       "[2] project 1 - item 2 @label 2",
                       "[3] project 3 - item 3 "]
+
+
+def test_list_projects_cache():
+    """ Validates all items are outputted """
+    test_data = 'tests/test_state.json'
+
+    actual = todoistcli.list_cache_projects(test_data)
+
+    assert actual == ["project 1", "project 2", "project 3"]
