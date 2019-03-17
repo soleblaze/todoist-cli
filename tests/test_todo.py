@@ -97,3 +97,38 @@ def test_save_state(tmpdir):
     fh.close()
 
     assert actual == expected
+
+
+def test_load_state():
+    """ Validate that load_state loads the current todoist state in the expected format """
+    test_data = 'tests/test_state.json'
+
+    actual = todoistcli.load_state(test_data)
+
+    assert actual['projects'] == api.state['projects']
+    assert actual['items'] == api.state['items']
+    assert actual['labels'] == api.state['labels']
+
+
+def test_items_cache():
+    """ Validate that items_cache returns the items expected """
+    test_data = 'tests/test_state.json'
+
+    expected = todoistcli.items_cache(test_data)
+    assert api.state['items'] == expected
+
+
+def test_projects_cache():
+    """ Validate that projects_cache returns the projects expected """
+    test_data = 'tests/test_state.json'
+
+    expected = todoistcli.projects_cache(test_data)
+    assert api.state['projects'] == expected
+
+
+def test_labels_cache():
+    """ Validate that labels_cache returns the labels expected """
+    test_data = 'tests/test_state.json'
+
+    expected = todoistcli.labels_cache(test_data)
+    assert api.state['labels'] == expected

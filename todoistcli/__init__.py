@@ -109,26 +109,26 @@ def save_state(projects, items, labels, cache_file="~/.config/todoist/cache"):
     return True
 
 
-def load_state():
+def load_state(cache_file="~/.config/todoist/cache"):
     """ Load relevant todo information as json from a cache file """
-    with open(os.path.expanduser("~/.config/todoist/cache"), "r") as f:
+    with open(os.path.expanduser(cache_file), "r") as f:
         data = json.load(f)
     return data
 
 
-def items_cache():
+def items_cache(cache_file="~/.config/todoist/cache"):
     """ Returns a list of items from the cache file """
-    return load_state()['items']
+    return load_state(cache_file)['items']
 
 
-def projects_cache():
+def projects_cache(cache_file="~/.config/todoist/cache"):
     """ Returns a list of projects from the cache file """
-    return load_state()['projects']
+    return load_state(cache_file)['projects']
 
 
-def labels_cache():
+def labels_cache(cache_file="~/.config/todoist/cache"):
     """ Returns a list of labels from the cache file """
-    return load_state()['labels']
+    return load_state(cache_file)['labels']
 
 
 def sync(api):
