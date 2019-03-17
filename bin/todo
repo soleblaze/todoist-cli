@@ -7,7 +7,7 @@ import todoistcli
 def list_items(api):
     """ outputs a list of all items """
     if len(sys.argv) == 2:
-        todoistcli.list_items_all(api)
+        todoistcli.print_formatted_output(todoistcli.list_items_all(api))
     elif len(sys.argv) == 3:
         todoistcli.print_help()
     elif sys.argv[2].lower() == 'project':

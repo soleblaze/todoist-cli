@@ -194,9 +194,9 @@ def list_cache_projects():
     return True
 
 
-def list_items_project(api, project):
+def list_items_project(api, project, cache_file="~/.config/todoist/cache"):
     """ Outputs a list of items associated with project """
-    data = sync(api)
+    data = sync(api, cache_file)
     items = data['items']
     projects = data['projects']
     labels = data['labels']
@@ -212,8 +212,7 @@ def list_items_project(api, project):
             proj_ids.append(proj_id)
 
     if not proj_ids:
-        print("No project named {}".format(project))
-        exit(0)
+        return []
 
     for proj_id in proj_ids:
 
@@ -239,13 +238,12 @@ def list_items_project(api, project):
 
             output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
-def list_items_label(api, label):
+def list_items_label(api, label, cache_file="~/.config/todoist/cache"):
     """ Outputs a list of items associated with label """
-    data = sync(api)
+    data = sync(api, cache_file)
     items = data['items']
     projects = data['projects']
     labels = data['labels']
@@ -261,8 +259,7 @@ def list_items_label(api, label):
             label_ids.append(labels[name])
 
     if not label_ids:
-        print("No label named {}".format(label))
-        exit(0)
+        return []
 
     for label_id in label_ids:
         for proj_id in items:
@@ -286,13 +283,12 @@ def list_items_label(api, label):
 
                     output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
-def list_items_all(api):
+def list_items_all(api, cache_file="~/.config/todoist/cache"):
     """ List all items """
-    data = sync(api)
+    data = sync(api, cache_file)
     items = data['items']
     labels = data['labels']
     projects = data['projects']
@@ -316,8 +312,7 @@ def list_items_all(api):
 
             output.append(f"[{index}] {project_name} - {content} {i_labels}")
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
 def get_proj_id(api, project):

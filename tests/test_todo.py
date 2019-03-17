@@ -173,3 +173,50 @@ def test_list_labels(tmpdir):
     actual = todoistcli.list_labels(api, output)
 
     assert actual == ["label 1 (1)", "label 2 (1)", "label 3 (0)"]
+
+
+def test_list_items_project_success(tmpdir):
+    """ Validates all items associated with project 1 are outputted """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_project(api, "project 1", output)
+
+    assert actual == ["[1] project 1 - item 1 @label 1", "[2] project 1 - item 2 @label 2"]
+
+
+def test_list_items_project_failure(tmpdir):
+    """ Returns an empty array """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_project(api, "invalid", output)
+
+    assert actual == []
+
+
+def test_list_items_label_success(tmpdir):
+    """ Validates all items associated with label 1 are outputted """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_label(api, "label 1", output)
+
+    assert actual == ["[1] project 1 - item 1 @label 1"]
+
+
+def test_list_items_label_failure(tmpdir):
+    """ Returns an empty array """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_label(api, "invalid", output)
+
+    assert actual == []
+
+
+def test_list_items_all(tmpdir):
+    """ Validates all items are outputted """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_all(api, output)
+
+    assert actual == ["[1] project 1 - item 1 @label 1",
+                      "[2] project 1 - item 2 @label 2",
+                      "[3] project 3 - item 3 "]
