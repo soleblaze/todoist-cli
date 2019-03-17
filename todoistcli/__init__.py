@@ -207,7 +207,6 @@ def list_items_project(api, project, cache_file="~/.config/todoist/cache"):
     for proj_id in proj_ids:
 
         if proj_id not in items:
-            print(f"No items in {project}.")
             continue
 
         for item_id in items[proj_id]:
@@ -226,7 +225,7 @@ def list_items_project(api, project, cache_file="~/.config/todoist/cache"):
 
             i_labels = ' '.join(temp_labels)
 
-            output.append(f"[{index}] {project_name} - {content} {i_labels}")
+            output.append(f"[{index}] {project_name} - {content} {i_labels}".rstrip(" "))
 
     return sorted(output, key=natural_sort)
 

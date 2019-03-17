@@ -199,6 +199,17 @@ def test_list_items_project_success(tmpdir):
     assert actual == ["[1] project 1 - item 1 @label 1", "[2] project 1 - item 2 @label 2"]
 
 
+def test_list_items_project_match(tmpdir):
+    """ Validates all items that matches proj in project name are outputted """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_items_project(api, "proj", output)
+
+    assert actual == ["[1] project 1 - item 1 @label 1",
+                      "[2] project 1 - item 2 @label 2",
+                      "[3] project 3 - item 3"]
+
+
 def test_list_items_project_failure(tmpdir):
     """ Returns an empty array """
 
