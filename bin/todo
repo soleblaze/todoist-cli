@@ -12,9 +12,9 @@ ACTION = sys.argv[1]
 
 ACTIONS = {
     "sync": lambda: todoistcli.sync(API),
-    "projects": lambda: todoistcli.list_projects(API),
+    "projects": lambda: todoistcli.print_formatted_output(todoistcli.list_projects(API)),
     "list": lambda: todoistcli.list_items(API),
-    "labels": lambda: todoistcli.list_labels(API),
+    "labels": lambda: todoistcli.print_formatted_output(todoistcli.list_labels(API)),
     "add": lambda: todoistcli.add_item(API),
     "done": lambda: todoistcli.done(API),
     "archive": lambda: todoistcli.archive_project(API),

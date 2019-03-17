@@ -24,7 +24,7 @@ def print_help():
 
 def print_formatted_output(output):
     """ This will eventually handle formatting the output of data. """
-    print(output)
+    print('\n'.join(output))
 
 
 def natural_sort(s, nsre=re.compile('([0-9]+)')):
@@ -131,18 +131,18 @@ def labels_cache(cache_file="~/.config/todoist/cache"):
     return load_state(cache_file)['labels']
 
 
-def sync(api):
+def sync(api, cache_file="~/.config/todoist/cache"):
     """ Pulls todo items from api.state and returns them as a dict """
     projects = get_projects(api)
     items = get_items(api)
     labels = get_labels(api)
-    save_state(projects, items, labels)
+    save_state(projects, items, labels, cache_file)
     return {"projects": projects, "items": items, "labels": labels}
 
 
-def list_projects(api):
+def list_projects(api, cache_file="~/.config/todoist/cache"):
     """ output a list of projects """
-    data = sync(api)
+    data = sync(api, cache_file)
     projects = data['projects']
     items = data['items']
     output = []
@@ -153,14 +153,13 @@ def list_projects(api):
             count = 0
         output.append(f"{projects[proj_id]['name']} ({count})")
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
-def list_labels(api):
+def list_labels(api, cache_file="~/.config/todoist/cache"):
     """ outputs a list of labels """
-    labels = sync(api)['labels']
-    items = sync(api)['items']
+    labels = sync(api, cache_file)['labels']
+    items = sync(api, cache_file)['items']
     output = []
 
     for name, label_id in labels.items():
@@ -171,8 +170,7 @@ def list_labels(api):
                     count += 1
         output.append(f"{name} ({count})")
 
-    print('\n'.join(sorted(output, key=natural_sort)))
-    return True
+    return sorted(output, key=natural_sort)
 
 
 def list_items(api):

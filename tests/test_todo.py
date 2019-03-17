@@ -45,9 +45,9 @@ def test_print_help(capsys):
 
 def test_print_formatted_output(capsys):
     """ Verify that format outputs correctly """
-    todoistcli.print_formatted_output("test print")
+    todoistcli.print_formatted_output(["line 1", "line 2"])
     out, _ = capsys.readouterr()
-    assert out == "test print\n"
+    assert out == "line 1\nline 2\n"
 
 
 def test_natural_sort():
@@ -132,3 +132,44 @@ def test_labels_cache():
 
     expected = todoistcli.labels_cache(test_data)
     assert api.state['labels'] == expected
+
+
+def test_sync(tmpdir):
+    """ Validate that sync returns the proper data """
+    output = tmpdir.join('test_cache')
+
+    actual = todoistcli.sync(api, output)
+
+    projects = {1: {"name": "project 1"},
+                2: {"name": "project 2"},
+                3: {"name": "project 3"}}
+
+    items = {1: {1: {'content': 'item 1', 'index': 1, "labels": [1]},
+                 2: {'content': 'item 2', 'index': 2, "labels": [2]}},
+             3: {3: {'content': 'item 3', 'index': 3, "labels": []}}}
+
+    labels = {"label 1": 1,
+              "label 2": 2,
+              "label 3": 3}
+
+    assert actual['items'] == items
+    assert actual['labels'] == labels
+    assert actual['projects'] == projects
+
+
+def test_list_projects(tmpdir):
+    """ Validate that list_projects returns the proper projects """
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_projects(api, output)
+
+    assert actual == ["project 1 (2)", "project 2 (0)", "project 3 (1)"]
+
+
+def test_list_labels(tmpdir):
+    """ Validate that list_labels returns the proper labels"""
+
+    output = tmpdir.join('test_cache')
+    actual = todoistcli.list_labels(api, output)
+
+    assert actual == ["label 1 (1)", "label 2 (1)", "label 3 (0)"]
