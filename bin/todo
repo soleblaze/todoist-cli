@@ -3,6 +3,21 @@
 import sys
 import todoistcli
 
+
+def list_items(api):
+    """ outputs a list of all items """
+    if len(sys.argv) == 2:
+        todoistcli.list_items_all(api)
+    elif len(sys.argv) == 3:
+        todoistcli.print_help()
+    elif sys.argv[2].lower() == 'project':
+        todoistcli.print_formatted_output(todoistcli.list_items_project(api, ' '.join(sys.argv[3:])))
+    elif sys.argv[2].lower() == 'label':
+        todoistcli.print_formatted_output(todoistcli.list_items_label(api, ' '.join(sys.argv[3:])))
+    else:
+        todoistcli.print_help()
+
+
 if len(sys.argv) == 1:
     todoistcli.print_help()
     exit(0)
@@ -13,7 +28,7 @@ ACTION = sys.argv[1]
 ACTIONS = {
     "sync": lambda: todoistcli.sync(API),
     "projects": lambda: todoistcli.print_formatted_output(todoistcli.list_projects(API)),
-    "list": lambda: todoistcli.list_items(API),
+    "list": lambda: list_items(API),
     "labels": lambda: todoistcli.print_formatted_output(todoistcli.list_labels(API)),
     "add": lambda: todoistcli.add_item(API),
     "done": lambda: todoistcli.done(API),

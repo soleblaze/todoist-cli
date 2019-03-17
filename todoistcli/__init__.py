@@ -173,20 +173,6 @@ def list_labels(api, cache_file="~/.config/todoist/cache"):
     return sorted(output, key=natural_sort)
 
 
-def list_items(api):
-    """ outputs a list of all items """
-    if len(sys.argv) == 2:
-        list_items_all(api)
-    elif len(sys.argv) == 3:
-        print_help()
-    elif sys.argv[2].lower() == 'project':
-        list_items_project(api, ' '.join(sys.argv[3:]))
-    elif sys.argv[2].lower() == 'label':
-        list_items_label(api, ' '.join(sys.argv[3:]))
-    else:
-        print_help()
-
-
 def cache():
     """ Outputs items from cache instead of from todoist """
     if len(sys.argv) != 3:
