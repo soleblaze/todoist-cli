@@ -96,14 +96,14 @@ def get_items(api):
     return items
 
 
-def save_state(projects, items, labels):
+def save_state(projects, items, labels, cache_file="~/.config/todoist/cache"):
     """ Saves relevant todo information as json into a cache file """
     state = {
         "projects": projects,
         "items": items,
         "labels": labels
     }
-    fh = open(os.path.expanduser("~/.config/todoist/cache"), "w")
+    fh = open(os.path.expanduser(cache_file), "w")
     fh.write(json.dumps(state))
     fh.close()
     return True

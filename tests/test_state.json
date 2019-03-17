@@ -1,0 +1,116 @@
+{
+  "projects": [
+    {
+      "id": 1,
+      "name": "project 1",
+      "is_archived": 0,
+      "is_deleted": 0
+    },
+    {
+      "id": 2,
+      "name": "project 2",
+      "is_archived": 0,
+      "is_deleted": 0
+    },
+    {
+      "id": 3,
+      "name": "project 3",
+      "is_archived": 0,
+      "is_deleted": 0
+    },
+    {
+      "id": 4,
+      "name": "project 4",
+      "is_archived": 1,
+      "is_deleted": 0
+    },
+    {
+      "id": 5,
+      "name": "project 5",
+      "is_archived": 0,
+      "is_deleted": 1
+    }
+  ],
+  "items": [
+    {
+      "id": 1,
+      "project_id": 1,
+      "content": "item 1",
+      "is_archived": 0,
+      "in_history": 0,
+      "is_deleted": 0,
+      "labels": [
+        1
+      ]
+    },
+    {
+      "id": 2,
+      "project_id": 1,
+      "content": "item 2",
+      "is_archived": 0,
+      "in_history": 0,
+      "is_deleted": 0,
+      "labels": [
+        2
+      ]
+    },
+    {
+      "id": 3,
+      "project_id": 3,
+      "content": "item 3",
+      "is_archived": 0,
+      "in_history": 0,
+      "is_deleted": 0,
+      "labels": []
+    },
+    {
+      "id": 4,
+      "project_id": 4,
+      "content": "item 4",
+      "is_archived": 1,
+      "in_history": 0,
+      "is_deleted": 0,
+      "labels": []
+    },
+    {
+      "id": 5,
+      "project_id": 5,
+      "content": "item 5",
+      "is_archived": 0,
+      "in_history": 1,
+      "is_deleted": 0,
+      "labels": []
+    },
+    {
+      "id": 6,
+      "project_id": 6,
+      "content": "item 6",
+      "is_archived": 0,
+      "in_history": 0,
+      "is_deleted": 1,
+      "labels": []
+    }
+  ],
+  "labels": [
+    {
+      "id": 1,
+      "name": "label 1",
+      "is_deleted": 0
+    },
+    {
+      "id": 2,
+      "name": "label 2",
+      "is_deleted": 0
+    },
+    {
+      "id": 3,
+      "name": "label 3",
+      "is_deleted": 0
+    },
+    {
+      "id": 4,
+      "name": "label 4",
+      "is_deleted": 1
+    }
+  ]
+}

@@ -1,4 +1,5 @@
 """ Basic tests for todoistcli """
+import json
 import todoistcli
 
 
@@ -33,7 +34,6 @@ class api:
             {"id": 5, "name": "project 5", "is_archived": 0, "is_deleted": 1}
         ]
     }
-
 
 
 def test_print_help(capsys):
@@ -79,3 +79,21 @@ def test_get_items():
     assert items == {1: {1: {'content': 'item 1', 'index': 1, "labels": [1]},
                          2: {'content': 'item 2', 'index': 2, "labels": [2]}},
                      3: {3: {'content': 'item 3', 'index': 3, "labels": []}}}
+
+
+def test_save_state(tmpdir):
+    """ Validate that save_state saves the current todoist state in the expected format """
+    output = tmpdir.join('test_cache')
+    test_data = 'tests/test_state.json'
+
+    todoistcli.save_state(api.state['projects'], api.state['items'], api.state['labels'], output)
+
+    fh = open(test_data)
+    expected = json.load(fh)
+    fh.close()
+
+    fh = open(output)
+    actual = json.load(fh)
+    fh.close()
+
+    assert actual == expected
